@@ -1,0 +1,16 @@
+include header.jade
+
+form#paiement.wrapper(method="post" action="/users/signuptrue")
+  fieldset
+    legend S'inscrire !
+      ol
+        li
+          label(for='nom') Identifiant
+          input#nom(name='id', type='text', placeholder='votre nom', required='true', autofocus='')
+        li
+          label(for='telephone') Mot de Passe
+          input#telephone(name='password', type='password', placeholder='par ex : 1234', required='true')
+
+        button(type='submit') Connection
+
+

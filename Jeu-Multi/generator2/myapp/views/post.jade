@@ -1,0 +1,56 @@
+include header.jade
+
+div.articlefull
+	h1.title= value.titre  || 'Titre'
+	div!= value.contenu || 'Contenu'
+	p Crée le #{moment(value.dateCreation).format('MM/DD/YYYY') || 'pas de date'} 
+	p Modifié le #{moment(value.dateModif).format('MM/DD/YYYY') || 'pas de date' }
+	p Auteur : #{value.auteur || 'admin'}
+
+	if role ==2 || role ==1
+		a.button(href="/modif?page="+value._id) Modifier
+
+div#comments.wrapper
+
+	h2 Commentaire
+	
+	if value.comment
+		p= value.comment.author
+		p= value.comment.email
+		p= value.comment.website
+		p= value.comment.size
+	
+	if !role
+		| Pour poster un Commentaire, connectez-vous!
+	else
+		form#commentform.comment-form(method='post', action='/post?page='+value._id)
+			p.comment-notes
+				span#email-notes Your email address will not be published.
+			| Required fields are marked
+			span.required *
+			p.comment-form-comment
+			label(for='comment') Comment
+			textarea#comment(required='required', rows='8', cols='45', name='comment')
+			p.comment-form-author
+			label(for='author')
+			| Name
+			span.required *
+			input#author(type='text', required='required', aria-required='true', size='30', value='', name='author')
+			p.comment-form-email
+				label(for='email')
+				| Email
+				span.required *
+				input#email(type='email', required='required', aria-required='true',  size='30', value='', name='email')
+			p.comment-form-url
+				| Website
+				input#email(type='text', required='required', aria-required='true', aria-describedby='email-notes', size='30', value='', name='website')
+			p.form-submit
+				input#submit.submit(type='submit', value='Post Comment', name='submit')
+
+			p(style='display: none;')
+			p.comment-subscription-form
+			p.comment-subscription-form
+			p(style='display: none;')
+			input#ak_js(type='hidden', value='1454804162898', name='ak_js')
+	
+		

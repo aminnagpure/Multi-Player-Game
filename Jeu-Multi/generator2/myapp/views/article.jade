@@ -1,0 +1,22 @@
+include header.jade
+
+section.wrapper
+	h1 Gestion de l'article
+	form(method='post' action='/' enctype="multipart/form-data")
+		| Choisissez votre titre
+		input(name='title')
+		hr
+		textarea#mytextarea(name='contenu')
+		input(type="file" name="article" accept="image/*")
+		button.send Post
+	script.
+		$('.send').click(function(e){
+			if($('input').val()=="" || tinyMCE.get('mytextarea').getContent()==""){
+			e.preventDefault()
+			alert('Veuillez remplir les champs');
+			} else{
+				$(this).attr({type:"submit"})
+			}
+			
+		})
+			

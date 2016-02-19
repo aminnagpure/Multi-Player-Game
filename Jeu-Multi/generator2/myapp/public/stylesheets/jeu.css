@@ -1,0 +1,17 @@
+body{
+	background:url(../images/route-66-2.jpg);
+}
+
+.ready{
+	border:1px solid black;
+	display:inline-block;
+}
+
+
+div[id^='/']{
+	background: url(../images/moto.png)
+}
+
+.truck{
+	background: url(../images/moto.png);
+}
