@@ -48,7 +48,7 @@ module.exports = function(io) {
 				height: 40,
 				position: 'absolute',
 			};
-			socket.emit('newTruck', Camion);
+			
 
 
 			socket.on('majTruck', function(data){
@@ -67,9 +67,9 @@ module.exports = function(io) {
 			// send client to room 1
 			socket.join(socket.room.name);
 			if (socket.room.profil.length == 2) {
-
+				io.sockets.in(socket.room.name).emit('newTruck', Camion);
 			}
-
+			console.log(socket.room.name + socket.room.profil.length)
 			// echo to client they've connected
 			socket.emit('updatechat', 'SERVER', 'you have connected to ' + socket.room.name, socket.room.name);
 			// echo to room 1 that a person has connected to their room
@@ -103,7 +103,7 @@ module.exports = function(io) {
 					carres[data.id].left = data.left;
 				}
 
-				socket.broadcast.emit('changerPositionnementDeSonCarre', data);
+				socket.broadcast.to(socket.room.name).emit('changerPositionnementDeSonCarre', data);
 
 			});
 			// Waiting for connexion 2 ??? 
@@ -113,11 +113,6 @@ module.exports = function(io) {
 			// }
 
 		});
-
-		// socket.on('connectedUsers', function() {
-		// 	console.log(socket.username)
-		// 	io.sockets.in(socket.room.name).emit('connectedUsers', username);
-		// });
 
 		socket.on('sendchat', function(data) {
 
@@ -134,8 +129,9 @@ module.exports = function(io) {
 			socket.leave(socket.room);
 			// delete usernames[socket.username];
 			// update list of users in chat, client-side
-			for (var i = 0; i < rooms[i].profil.length; i++) {
-				rooms[i].profil.splice(i, 1)
+			delete socket.username
+			for (var i = 0; i < socket.room.profil.length; i++) {
+				socket.room.profil.splice(i, 1)
 			}
 			console.log(socket.room)
 			setInterval(function() {

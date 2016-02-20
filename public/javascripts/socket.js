@@ -1,7 +1,8 @@
   (function(window, io) {
     window.addEventListener('DOMContentLoaded', function() {
 
-      var socket = io('http://192.168.104.177:3000');
+      var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
+      var socket = io('http://192.168.1.77:3000');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
@@ -43,6 +44,7 @@
       // Game//
       /////
 
+      //dis camion
       socket.on('newTruck', function(data) {
           var CamionElement = document.createElement('img')
         data.creation = function() {
@@ -57,7 +59,7 @@
           return data;
         };
         data.animation = function() {
-          data.y = data.y + data.step;
+          data.y = data.y;//+ data.step
           if (data.y >= window.innerHeight) {
             data.y = window.innerHeight*0.3; //taille de la fenetre
             // data.x = Math.floor(Math.random() * 200);
@@ -75,7 +77,7 @@
           x : data.x
         }
         socket.emit('majTruck', objSend)
-      })
+      });
 
       // premier joueur voit tout //deuxieme voit seulement le troisime joueur bouger et troisieme joueur ne voit rien 
       socket.on('creerLesAutresCarres', function(data) {
