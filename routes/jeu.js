@@ -39,23 +39,30 @@ module.exports = function(io) {
 			usernames[username] = username;
 
 			var Camion = {
-				y: socket.screenHeight * 0.3,
-				step: Math.round(Math.random() * 10) + 1,
-				x: socket.screenWidth / 2,
+				y: 200,
+				step: Math.round(Math.random()+1),
+				x: 520,
 				id: socket.id,
 				width: 40,
 				className:'camion',
 				height: 40,
 				position: 'absolute',
 			};
-			
-
 
 			socket.on('majTruck', function(data){
 				Camion.x = data.x;
 				Camion.y = data.y;
+				Camion.width = data.width;
+				Camion.height = data.height;
 				//apelez une fonction de check collision
 			})
+
+			var checkCollision = function(){
+if (carres[data.id].left + carres[data.id].width >= Camion.x && carres[data.id].left + carres[data.id].width <= Camion.x + Camion.width) {
+	io.sockets.in(socket.room.name).emit('collision', 'new collision')
+}
+
+			};
 
 			for (var i = 0; i < rooms.length; i++) {
 				if (rooms[i].profil.length < 2) {
@@ -66,9 +73,15 @@ module.exports = function(io) {
 			}
 			// send client to room 1
 			socket.join(socket.room.name);
+			//launch the party
+			var messageWait = 'En attente d\'un autre joueur';
+			io.sockets.in(socket.room.name).emit('global',messageWait);
 			if (socket.room.profil.length == 2) {
+				messageWait ='Let\'s Go' ;
 				io.sockets.in(socket.room.name).emit('newTruck', Camion);
-			}
+				// io.sockets.in(socket.room.name).emit('global',messageWait);
+			} 
+
 			console.log(socket.room.name + socket.room.profil.length)
 			// echo to client they've connected
 			socket.emit('updatechat', 'SERVER', 'you have connected to ' + socket.room.name, socket.room.name);
@@ -77,9 +90,9 @@ module.exports = function(io) {
 			var randomColor = "rgb(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ")";
 
 			var carre = {
-				top: socket.screenHeight * 0.85,
-				left: socket.screenWidth / 2,
-				id: socket.id,
+				top: 500,
+				left: 480,
+				id: 'moto-'+socket.username,
 				score: socket.score,
 				name: socket.username,
 				width: '70px',
@@ -102,15 +115,10 @@ module.exports = function(io) {
 					carres[data.id].top = data.top;
 					carres[data.id].left = data.left;
 				}
+				console.log(data)
 
 				socket.broadcast.to(socket.room.name).emit('changerPositionnementDeSonCarre', data);
-
 			});
-			// Waiting for connexion 2 ??? 
-			// for (var i = 0; i < rooms.length; i++) {
-			// 	if(rooms[i].profil.length == 2){
-			// 	}	
-			// }
 
 		});
 
@@ -129,9 +137,9 @@ module.exports = function(io) {
 			socket.leave(socket.room);
 			// delete usernames[socket.username];
 			// update list of users in chat, client-side
-			delete socket.username
+
 			for (var i = 0; i < socket.room.profil.length; i++) {
-				socket.room.profil.splice(i, 1)
+				socket.room.profil.splice(i, 1);
 			}
 			console.log(socket.room)
 			setInterval(function() {

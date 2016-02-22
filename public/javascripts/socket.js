@@ -2,12 +2,13 @@
     window.addEventListener('DOMContentLoaded', function() {
 
       var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
-      var socket = io('http://192.168.1.77:3000');
+      var socket = io('http://192.168.104.177:3000');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
         socket.emit('adduser', prompt("What's your name?"), window.innerWidth, window.innerHeight);
       });
+      var game = document.getElementById('game');
 
       /////
       // Chat//
@@ -17,7 +18,6 @@
       socket.on('updatechat', function(username, data, room, score) {
         $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
         $('#rooms').append(room);
-
 
       });
 
@@ -30,7 +30,6 @@
           // tell server to execute 'sendchat' and send along one parameter
           socket.emit('sendchat', message);
         });
-
         // when the client hits ENTER on their keyboard
         $('#data').keypress(function(e) {
           if (e.which == 13) {
@@ -43,10 +42,15 @@
       /////
       // Game//
       /////
+      socket.on('global', function(data) {
+        $('#game').html('<p>' + data + '</p>');
+      });
 
+          var t = setInterval(Math.round(Math.random() + 1),1000)
+          
       //dis camion
       socket.on('newTruck', function(data) {
-          var CamionElement = document.createElement('img')
+        var CamionElement = document.createElement('img')
         data.creation = function() {
           CamionElement.setAttribute('src', 'images/truck.png');
           CamionElement.style.top = data.y + "px";
@@ -55,26 +59,42 @@
           CamionElement.style.height = data.height + "px";
           CamionElement.style.width = data.width + "px";
           CamionElement.style.position = data.position;
-          document.body.appendChild(CamionElement)
+          game.appendChild(CamionElement)
           return data;
         };
         data.animation = function() {
-          data.y = data.y;//+ data.step
-          if (data.y >= window.innerHeight) {
-            data.y = window.innerHeight*0.3; //taille de la fenetre
-            // data.x = Math.floor(Math.random() * 200);
+          data.y = data.y + 2;
+          data.height = data.height + 0.9;
+          data.width = data.width + 1;
+          console.log(t)
+          if (t == 1) {
+            data.x -= 1;
+          } else if (t == 2) {
+            data.x -= 2;
           }
-          $(CamionElement).animate({ transform: 'scale(2,0.5)'},200);
+          if (data.y >= game.offsetHeight - data.height) { // if end of the map
+            data.y = 200 + data.step;
+            data.width = 40;
+            data.height = 40;
+            data.x = 520;
+          }
           CamionElement.style.left = data.x + 'px';
           CamionElement.style.top = data.y + 'px';
+          CamionElement.style.width = data.width + 'px';
+          CamionElement.style.height = data.height + 'px';
+
           window.requestAnimationFrame(function() {
             data.animation();
           });
         };
+
+
         data.creation().animation();
         var objSend = {
-          y : data.y,
-          x : data.x
+          y: data.y,
+          x: data.x,
+          width: data.width,
+          height: data.height
         }
         socket.emit('majTruck', objSend)
       });
@@ -88,7 +108,7 @@
           if (!HTMLDivElement) {
             var HTMLDivElement = window.document.createElement('div');
             HTMLDivElement.id = data[index].id;
-            window.document.body.appendChild(HTMLDivElement);
+            game.appendChild(HTMLDivElement);
           }
 
           HTMLDivElement.style.top = data[index].top;
@@ -124,13 +144,36 @@
         if (!HTMLDivElement) {
           var HTMLDivElement = window.document.createElement('div');
           HTMLDivElement.id = data.id;
-          window.document.body.appendChild(HTMLDivElement);
-
+          game.appendChild(HTMLDivElement);
         }
+        HTMLDivElement.style.top = data.top;
+        HTMLDivElement.style.left = data.left;
+        HTMLDivElement.style.width = data.width;
+        HTMLDivElement.style.height = data.height;
+        HTMLDivElement.style.position = data.position;
+        HTMLDivElement.style.backgroundColor = data.backgroundColor;
 
-        window.addEventListener('click', function(event) {
-          HTMLDivElement.style.top = (event.clientY - (parseFloat(HTMLDivElement.style.height) / 2)) + 'px';
-          HTMLDivElement.style.left = (event.clientX - (parseFloat(HTMLDivElement.style.width) / 2)) + 'px';
+
+        window.addEventListener('keydown', function(e) {
+          var motoGame = $('#' + data.id).position();
+          switch (e.keyCode) {
+            case 39:
+              e.preventDefault();
+
+              // HTMLDivElement.style.left = data.left + 10 + 'px';
+              $('#' + data.id).css({
+                'left': motoGame.left + 10 + 'px'
+              });
+
+              break;
+            case 37:
+              e.preventDefault();
+              // HTMLDivElement.style.left = data.left-10 + 'px';
+              $('#' + data.id).css({
+                'left': motoGame.left - 10 + 'px'
+              });
+              break;
+          }
 
           socket.emit('changerPositionnementDeMonCarre', {
             id: HTMLDivElement.id,
@@ -140,14 +183,6 @@
 
         });
 
-
-        HTMLDivElement.style.top = data.top;
-        HTMLDivElement.style.left = data.left;
-        HTMLDivElement.style.width = data.width;
-        HTMLDivElement.style.height = data.height;
-        HTMLDivElement.style.position = data.position;
-        HTMLDivElement.style.backgroundColor = data.backgroundColor;
-
       });
       //premier joueur peut afficher son carré sur le deuxiemen joueur mais le deusieme, joueuyr n'affiche pas son carré si desactiver
 
@@ -156,7 +191,7 @@
         if (!HTMLDivElement) {
           var HTMLDivElement = window.document.createElement('div');
           HTMLDivElement.id = data.id;
-          window.document.body.appendChild(HTMLDivElement);
+          game.appendChild(HTMLDivElement);
         }
 
         HTMLDivElement.style.top = data.top;
@@ -175,7 +210,7 @@
         if (HTMLDivElement) {
           HTMLDivElement.style.top = data.top;
           HTMLDivElement.style.left = data.left;
-        };
+        }
 
       });
 

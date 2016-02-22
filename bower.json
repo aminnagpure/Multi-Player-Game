@@ -1,0 +1,31 @@
+{
+  "name": "app-express",
+  "description": "application express",
+  "main": "blog.js",
+  "authors": [
+    "Pierre-Philippe"
+  ],
+  "license": "ISC",
+  "moduleType": [
+    "node"
+  ],
+  "dependencies": {
+    "knacss": "latest",
+    "html5shiv": "latest",
+    "box-sizing-polyfill": "latest",
+    "modernizr": "latest",
+    "jquery": "1.10.2",
+    "bootstrap": "^3.3.6",
+    "moment":"latest",
+    "jasmine":"latest"
+  },
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
