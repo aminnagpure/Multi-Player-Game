@@ -21,78 +21,59 @@ module.exports = function(io) {
 		profil: []
 	}];
 	var carres = {};
-
+	var Camion = {
+		y: 200,
+		step: Math.round(Math.random() + 1),
+		x: 520,
+		id: 'elCamion',
+		width: 40,
+		className: 'camion',
+		height: 40,
+		position: 'absolute',
+	};
 	io.sockets.on('connection', function(socket) {
 		console.log('connéecté');
 		// ObjCamion.creation().moveObstacle();
-		socket.on('adduser', function(username, screenWidth, screenHeight, score) {
-
+		socket.on('adduser', function(data) {
 			// store the username in the socket session for this client
-			socket.username = username;
-			socket.screenHeight = screenHeight;
-			socket.screenWidth = screenWidth;
-
-			socket.score = score = 0;
+			socket.username = data.prompt;
+			socket.screenHeight = data.windowX;
+			socket.screenWidth = data.windowY;
+			socket.score = data.score = 0;
 			// store the room name in the socket session for this client
-			socket.room;
+			// socket.room;
 			// add the client's username to the global list
-			usernames[username] = username;
-
-			var Camion = {
-				y: 200,
-				step: Math.round(Math.random()+1),
-				x: 520,
-				id: socket.id,
-				width: 40,
-				className:'camion',
-				height: 40,
-				position: 'absolute',
-			};
-
-			socket.on('majTruck', function(data){
-				Camion.x = data.x;
-				Camion.y = data.y;
-				Camion.width = data.width;
-				Camion.height = data.height;
-				//apelez une fonction de check collision
-			})
-
-			var checkCollision = function(){
-if (carres[data.id].left + carres[data.id].width >= Camion.x && carres[data.id].left + carres[data.id].width <= Camion.x + Camion.width) {
-	io.sockets.in(socket.room.name).emit('collision', 'new collision')
-}
-
-			};
+			usernames[socket.username] = data.prompt;
 
 			for (var i = 0; i < rooms.length; i++) {
 				if (rooms[i].profil.length < 2) {
-					rooms[i].profil.push(username)
+					rooms[i].profil.push(socket.username);
 					socket.room = rooms[i];
+
 					break;
 				}
 			}
 			// send client to room 1
 			socket.join(socket.room.name);
 			//launch the party
-			var messageWait = 'En attente d\'un autre joueur';
-			io.sockets.in(socket.room.name).emit('global',messageWait);
+			// var messageWait = 'En attente';
+			// io.sockets.in(socket.room.name).emit('global',messageWait);
 			if (socket.room.profil.length == 2) {
-				messageWait ='Let\'s Go' ;
+				// messageWait ='GO GO GO' ;
 				io.sockets.in(socket.room.name).emit('newTruck', Camion);
-				// io.sockets.in(socket.room.name).emit('global',messageWait);
-			} 
+				// socket.emit('global',messageWait);
+			}
 
-			console.log(socket.room.name + socket.room.profil.length)
 			// echo to client they've connected
-			socket.emit('updatechat', 'SERVER', 'you have connected to ' + socket.room.name, socket.room.name);
+			socket.emit('updatechat', 'Server', 'you have connected to ' + socket.room.name, socket.room.name);
 			// echo to room 1 that a person has connected to their room
-			socket.broadcast.to(socket.room.name).emit('updatechat', 'SERVER', username + ' has connected to this room');
+			socket.broadcast.to(socket.room.name).emit('updatechat', 'Server', socket.username + ' has connected to this room');
 			var randomColor = "rgb(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ")";
 
 			var carre = {
 				top: 500,
 				left: 480,
-				id: 'moto-'+socket.username,
+				id: 'moto-' + socket.username,
 				score: socket.score,
 				name: socket.username,
 				width: '70px',
@@ -103,6 +84,8 @@ if (carres[data.id].left + carres[data.id].width >= Camion.x && carres[data.id].
 
 			carres[carre.id] = carre;
 
+
+
 			// mon carré
 			socket.emit('creerMonCarre', carre, socket.username, socket.score);
 			//celui de tout ceux connécté
@@ -111,45 +94,65 @@ if (carres[data.id].left + carres[data.id].width >= Camion.x && carres[data.id].
 			socket.broadcast.to(socket.room.name).emit('creerSonCarre', carre);
 			// enregisntre les dernieres positions de tous les carré
 			socket.on('changerPositionnementDeMonCarre', function(data) {
+				
 				if (carres[data.id]) {
 					carres[data.id].top = data.top;
 					carres[data.id].left = data.left;
 				}
-				console.log(data)
-
+				
+				var checkCollision = function() {
+					console.log(carre[data.id].top + Camion.y)
+					if (carres[data.id].top <= Camion.y) 
+					{
+						console.log('collisions');
+						io.sockets.in(socket.room.name).emit('updatechat', socket.username, 'new collision')
+					}
+				};
 				socket.broadcast.to(socket.room.name).emit('changerPositionnementDeSonCarre', data);
+				// checkCollision();
+
 			});
 
-		});
+			socket.on('majTruck', function(data) {
+				Camion.x = data.x;
+				Camion.y = data.y;
+				Camion.width = data.width;
+				Camion.height = data.height;
+				checkCollision();
+			});
+
+		}); // connection
 
 		socket.on('sendchat', function(data) {
-
 			// we tell the client to execute 'updatechat' with 2 parameters
 			io.sockets.in(socket.room.name).emit('updatechat', socket.username, data);
 		});
 
-		// when the user disconnects.. perform this
+		//when the user disconnects.. perform this
 		socket.on('disconnect', function() {
-			// remove the username from global usernames list
-			io.sockets.emit('updateusers', usernames);
-			// echo globally that this client has left
-			socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
-			socket.leave(socket.room);
-			// delete usernames[socket.username];
-			// update list of users in chat, client-side
 
+			console.log('passé par déconnection')
 			for (var i = 0; i < socket.room.profil.length; i++) {
 				socket.room.profil.splice(i, 1);
 			}
-			console.log(socket.room)
 			setInterval(function() {
 				for (index in carres) {
 					if (!io.sockets.connected[carres[index].id]) {
 						io.emit('detruireCarre', carres[index]);
 						delete carres[index];
-					};
+					}
 				}
 			}, 1000);
+
+			// remove the username from global usernames list
+
+			socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+			// socket.leave(socket.room.name);
+			// delete usernames[socket.username];
+			// update list of users in chat, client-side
+
+			console.log(socket.room.profil);
+			delete socket.username;
 		});
 
 	});

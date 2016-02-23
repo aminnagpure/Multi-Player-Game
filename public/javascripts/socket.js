@@ -2,11 +2,16 @@
     window.addEventListener('DOMContentLoaded', function() {
 
       var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
-      var socket = io('http://192.168.104.177:3000');
+      var socket = io('http://192.168.1.77:3000');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
-        socket.emit('adduser', prompt("What's your name?"), window.innerWidth, window.innerHeight);
+        var obj = {
+          prompt: prompt("What's your name?"),
+          windowX : window.innerWidth,
+          windowY:window.innerHeight
+        }
+        socket.emit('adduser', obj);
       });
       var game = document.getElementById('game');
 
@@ -15,7 +20,7 @@
       /////
 
       // listener, whenever the server emits 'updatechat', this updates the chat body
-      socket.on('updatechat', function(username, data, room, score) {
+      socket.on('updatechat', function(username, data, room) {
         $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
         $('#rooms').append(room);
 
@@ -46,8 +51,8 @@
         $('#game').html('<p>' + data + '</p>');
       });
 
-          var t = setInterval(Math.round(Math.random() + 1),1000)
-          
+      var t = Math.round(Math.random() + 1)
+
       //dis camion
       socket.on('newTruck', function(data) {
         var CamionElement = document.createElement('img')
@@ -67,16 +72,15 @@
           data.height = data.height + 0.9;
           data.width = data.width + 1;
           console.log(t)
-          if (t == 1) {
-            data.x -= 1;
-          } else if (t == 2) {
-            data.x -= 2;
-          }
+
+          data.x -=t;
+
           if (data.y >= game.offsetHeight - data.height) { // if end of the map
             data.y = 200 + data.step;
             data.width = 40;
             data.height = 40;
             data.x = 520;
+            t = Math.round(Math.random() *3)
           }
           CamionElement.style.left = data.x + 'px';
           CamionElement.style.top = data.y + 'px';
@@ -86,10 +90,6 @@
           window.requestAnimationFrame(function() {
             data.animation();
           });
-        };
-
-
-        data.creation().animation();
         var objSend = {
           y: data.y,
           x: data.x,
@@ -97,12 +97,14 @@
           height: data.height
         }
         socket.emit('majTruck', objSend)
+        };
+
+        data.creation().animation();
       });
 
       // premier joueur voit tout //deuxieme voit seulement le troisime joueur bouger et troisieme joueur ne voit rien 
       socket.on('creerLesAutresCarres', function(data) {
         for (index in data) {
-          // for (var index = 0; index < data.length; index++) {
 
           var HTMLDivElement = window.document.getElementById(data[index].id);
           if (!HTMLDivElement) {
@@ -119,7 +121,7 @@
           HTMLDivElement.style.backgroundColor = data[index].backgroundColor;
           $(HTMLDivElement).append('<p>' + data[index].name + '</p>') // permet au premiers joueurs de voir le numéro des joueur qui se connectent après
         }
-        // }
+
       });
 
       socket.on('detruireCarre', function(data) {
@@ -136,12 +138,9 @@
         $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur voit ca
 
         $('#score').append('<p>score: ' + score + '</p>');
-        if (username != 'SERVER') {
-          $('#users').html('<p>Username:' + username + '</p>');
-          $('#tableauScore').append('<div class="ready">' + username + ' Are you ready??</div>');
 
-        }
         if (!HTMLDivElement) {
+
           var HTMLDivElement = window.document.createElement('div');
           HTMLDivElement.id = data.id;
           game.appendChild(HTMLDivElement);
@@ -152,7 +151,7 @@
         HTMLDivElement.style.height = data.height;
         HTMLDivElement.style.position = data.position;
         HTMLDivElement.style.backgroundColor = data.backgroundColor;
-
+        // permet au premiers joueurs de voir le numéro des joueur qui se connectent après
 
         window.addEventListener('keydown', function(e) {
           var motoGame = $('#' + data.id).position();
@@ -162,7 +161,7 @@
 
               // HTMLDivElement.style.left = data.left + 10 + 'px';
               $('#' + data.id).css({
-                'left': motoGame.left + 10 + 'px'
+                'left': motoGame.left + 10
               });
 
               break;
@@ -170,15 +169,15 @@
               e.preventDefault();
               // HTMLDivElement.style.left = data.left-10 + 'px';
               $('#' + data.id).css({
-                'left': motoGame.left - 10 + 'px'
+                'left': motoGame.left - 10
               });
               break;
           }
 
           socket.emit('changerPositionnementDeMonCarre', {
             id: HTMLDivElement.id,
-            top: HTMLDivElement.style.top,
-            left: HTMLDivElement.style.left
+            top: parseInt(HTMLDivElement.style.top),
+            left: parseInt(HTMLDivElement.style.left)
           });
 
         });
