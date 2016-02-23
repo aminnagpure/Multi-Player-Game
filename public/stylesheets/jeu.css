@@ -66,8 +66,8 @@ abbr[title], dfn[title] {
   width: 100%; }
 
 .ready {
-  border: 1px solid black;
-  display: inline-block; }
+  font-weight: bold;
+  text-align: center; }
 
 div[id^='moto-'], .truck {
   background: url(../images/moto.png); }

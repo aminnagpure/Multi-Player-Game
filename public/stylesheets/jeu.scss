@@ -12,7 +12,7 @@ $comment-background : #f1f1f1;
  -o-transition: $transition;
  transition: $transition;
 }
-
+//
 /////
 // Media Query//
 /////
@@ -109,7 +109,7 @@ abbr[title], dfn[title] {
   background: url(../images/route-66-2.jpg) 50% 50%;
   width: 1000px;
   height: 600px;
-
+// 
   @include desktop{
 
   }
@@ -124,8 +124,8 @@ abbr[title], dfn[title] {
 }
 
 .ready {
-  border: 1px solid black;
-  display: inline-block;
+font-weight:bold;
+text-align: center
 }
 
 div[id^='moto-'], .truck {
