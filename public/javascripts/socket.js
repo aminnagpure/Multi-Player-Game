@@ -2,7 +2,7 @@
     window.addEventListener('DOMContentLoaded', function() {
 
       var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
-      var socket = io('http://192.168.104.177:3000');
+      var socket = io('http://192.168.1.77:3000');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
@@ -59,7 +59,7 @@
         data.creation = function() {
           CamionElement.setAttribute('src', 'images/truck.png');
           CamionElement.style.top = data.y + "px";
-          CamionElement.className = data.className
+          CamionElement.className = data.className;
           CamionElement.style.left = data.x + "px";
           CamionElement.style.height = data.height + "px";
           CamionElement.style.width = data.width + "px";
@@ -71,7 +71,7 @@
           data.y = data.y + 2;
           data.height = data.height + 0.9;
           data.width = data.width + 1;
-          console.log(t)
+
 
           data.x -= t;
 

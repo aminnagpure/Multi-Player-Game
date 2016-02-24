@@ -69,5 +69,5 @@ abbr[title], dfn[title] {
   font-weight: bold;
   text-align: center; }
 
-div[id^='moto-'], .truck {
+div[id^='/#'], .truck {
   background: url(../images/moto.png); }

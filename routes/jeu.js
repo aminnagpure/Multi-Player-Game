@@ -21,17 +21,17 @@ module.exports = function(io) {
 		profil: []
 	}];
 	var carres = {};
-	// var Camion = {
-	// 	y: 200,
-	// 	step: Math.round(Math.random() + 1),
-	// 	x: 520,
-	// 	id: socket.id,
-	// 	width: 40,
-	// 	className: 'camion',
-	// 	height: 40,
-	// 	position: 'absolute',
-	// };
 	io.sockets.on('connection', function(socket) {
+		var Camion = {
+			y: 200,
+			step: Math.round(Math.random() + 1),
+			x: 520,
+			id: socket.id,
+			width: 40,
+			className: 'camion',
+			height: 40,
+			position: 'absolute',
+		};
 		console.log('connéecté');
 		// ObjCamion.creation().moveObstacle();
 		socket.on('adduser', function(data) {
@@ -47,7 +47,7 @@ module.exports = function(io) {
 
 			for (var i = 0; i < rooms.length; i++) {
 				if (rooms[i].profil.length < 2) {
-					rooms[i].profil.push(socket.username);
+					rooms[i].profil.push(data.prompt);
 					socket.room = rooms[i];
 
 					break;
@@ -84,8 +84,6 @@ module.exports = function(io) {
 
 			carres[carre.id] = carre;
 
-
-
 			// mon carré
 			socket.emit('creerMonCarre', carre, socket.username, socket.score);
 			//celui de tout ceux connécté
@@ -101,7 +99,7 @@ module.exports = function(io) {
 				}
 				
 				var checkCollision = function() {
-					console.log(carre[data.id].top + Camion.y)
+					console.log(carres[data.id].top + Camion.y)
 					if (carres[data.id].top <= Camion.y) 
 					{
 						console.log('collisions');
@@ -109,7 +107,7 @@ module.exports = function(io) {
 					}
 				};
 				socket.broadcast.to(socket.room.name).emit('changerPositionnementDeSonCarre', data);
-				// checkCollision();
+				checkCollision();
 
 			});
 
@@ -132,9 +130,14 @@ module.exports = function(io) {
 		socket.on('disconnect', function() {
 
 			console.log('passé par déconnection')
+			if(socket.room){
+				
 			for (var i = 0; i < socket.room.profil.length; i++) {
-				if(socket.username == socket.room.profil[i])
+				if(socket.username == socket.room.profil[i]){
+
 				socket.room.profil.splice(i, 1);
+				}
+			}
 			}
 				for (index in carres) {
 					if (!io.sockets.connected[carres[index].id]) {

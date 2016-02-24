@@ -121,14 +121,14 @@ abbr[title], dfn[title] {
 
   @include tablet{
   }
-}
+}//
 
 .ready {
 font-weight:bold;
 text-align: center
 }
-
-div[id^='moto-'], .truck {
+/////
+div[id^='/#'], .truck {
   background: url(../images/moto.png);
 }
 
