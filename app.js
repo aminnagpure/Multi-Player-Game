@@ -1,24 +1,27 @@
-
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var socket_io    = require( "socket.io" );
+var socket_io = require("socket.io");
 global.session = require('express-session');
 global.date = new Date();
-
+var MongoDBStore = require('connect-mongodb-session')(session);
 var MongoClient = require('mongodb').MongoClient;
 var mongo = require('mongodb');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var app = express();
+var store = new MongoDBStore({
+  uri: 'mongodb://localhost:27017/jeu',
+  collection: 'mySessions'
+});
 app.mongoClient = MongoClient;
 app.locals.moment = require('moment');
 // Socket.io
-var io           = socket_io();
-app.io           = io;
+var io = socket_io();
+app.io = io;
 var jeu = require('./routes/jeu')(io);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,13 +31,16 @@ app.set('view engine', 'jade');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // la session est un middle ware ! adeclarer avant les routes !!!
 app.use(session({
   secret: '123456789SECRET',
+  store: store,
   saveUninitialized: false,
   resave: false,
   cookie: {
@@ -45,7 +51,7 @@ app.use(session({
 
 app.use('/', routes);
 app.use('/users', users);
-app.use('/jeu',jeu)
+app.use('/jeu', jeu)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

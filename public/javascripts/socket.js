@@ -15,15 +15,28 @@
       });
       var game = document.getElementById('game');
 
-      /////
-      // Chat//
-      /////
+      //////////
+      //Affichage //
+      //////////
+
+      socket.on('affichage', function(data) {
+        console.log(data)
+        $('#rooms').html(data.room);
+        $('#users').html(data.username);
+        $('#score').html(data.score)
+      });
+
+      socket.on('global',function(data){
+        $('#game').html('<p>' + data + '</p>');
+      })
+
+      /////////
+      //Chat //
+      /////////
 
       // listener, whenever the server emits 'updatechat', this updates the chat body
-      socket.on('updatechat', function(username, data, room) {
+      socket.on('updatechat', function(username, data) {
         $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
-        $('#rooms').append(room);
-
       });
 
       // on load of page
@@ -44,18 +57,16 @@
         });
       });
 
-      /////
-      // Game//
-      /////
-      socket.on('global', function(data) {
-        $('#game').html('<p>' + data + '</p>');
-      });
+      ///////////
+      //////////////
+      ////Game // //
+      //////////////
+      ///////////
 
-      var t = Math.round(Math.random() + 1)
 
-      ///////////////
-      //dis camion //
-      ///////////////
+      //////////
+      //Truck //
+      //////////
 
       socket.on('newTruck', function(data) {
         var CamionElement = document.createElement('img');
@@ -69,13 +80,14 @@
           CamionElement.style.width = data.width + "px";
           CamionElement.style.position = data.position;
           game.appendChild(CamionElement)
-          return data;
+          return data; // pour le chainage
         };
 
-        data.creation()
+        data.creation();
       });
       socket.on('majTruck', function(data) {
         var CamionElement = document.getElementById(data.id)
+
         CamionElement.style.left = data.x + 'px';
         CamionElement.style.top = data.y + 'px';
         CamionElement.style.width = data.width + 'px';
@@ -117,9 +129,7 @@
         var HTMLDivElement = window.document.getElementById(data.id);
         $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur voit ca
 
-
         if (!HTMLDivElement) {
-
           var HTMLDivElement = window.document.createElement('div');
           HTMLDivElement.id = data.id;
           game.appendChild(HTMLDivElement);
@@ -197,4 +207,3 @@
 
     });
   })(window, io);
-  console.log('test')
