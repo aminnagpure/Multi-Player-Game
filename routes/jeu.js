@@ -7,27 +7,35 @@ module.exports = function(io) {
 			title: 'Un test'
 		})
 	});
+	router.get('/over', function(req, res, next) {
+		res.render('over', {
+			title: 'Un test'
+		})
+	});
 	// usernames which are currently connected to the chat
 	var usernames = {};
 	var isTouched = false;
 	// rooms which are currently available in chat
+
 	var rooms = [{
-		name: 'room1',
-		profil: []
-	}, {
-		name: 'room2',
-		profil: []
-	}, {
-		name: 'room3',
-		profil: []
-	}];
+			name: 'room1',
+			profil: []
+		}
+		// {
+		// 	name: 'room2',
+		// 	profil: []
+		// }, {
+		// 	name: 'room3',
+		// 	profil: []
+		// }
+	];
 	var carres = {};
 	io.sockets.on('connection', function(socket) {
 		var Camion = {
 			y: 200,
 			step: Math.round(Math.random() + 1),
 			x: 520,
-			id: 'elCamionDeLaMuerte',
+			id: Math.random(),
 			width: 40,
 			className: 'camion',
 			height: 40,
@@ -51,15 +59,18 @@ module.exports = function(io) {
 						isTouched = false;
 					}
 					var checkCollision = function() {
+						for (index in carres) {
+							if (carres[index].top + carres[index].height >= Camion.y + Camion.height && carres[index].top <= Camion.y + Camion.height && carres[index].left + carres[index].width >= Camion.x && carres[index].left + carres[index].width <= Camion.x + Camion.width) {
+								carres[index].score -= 50
+								console.log(carres[index].name)
+								// io.emit('global',carres[index].name)
+								
+								socket.emit(socket.room.name).emit('affichage', gameData);
+								io.to(carres[index].id).emit('majScore', carres[index].score)
+								// io.to(carres[index].id).emit('global',carres[index].name);
 
-						for(index in carres){
+							}
 
-						if (carres[index].top + carres[index].height >= Camion.y + Camion.height && carres[index].top <= Camion.y + Camion.height && carres[index].left + carres[index].width >= Camion.x && carres[index].left + carres[index].width <= Camion.x + Camion.width) {
-							gameData.score -= 50;
-							socket.emit('affichage', gameData);
-							io.sockets.in(socket.room.name).emit('updatechat', socket.id, 'touché');
-						}
-							
 						}
 
 					};
@@ -69,13 +80,14 @@ module.exports = function(io) {
 			tabPosition: [-3, -2, -1, 0, 1],
 		};
 		socket.on('majTruck', function(data) {
+			console.log('passé par majtruck')
 			Camion.x = data.x;
 			Camion.y = data.y;
 			Camion.width = data.width;
 			Camion.height = data.height;
 
 		});
-		var gameData;
+
 		console.log('connéecté');
 		// ObjCamion.creation().moveObstacle();
 		socket.on('adduser', function(data) {
@@ -84,10 +96,12 @@ module.exports = function(io) {
 			socket.screenHeight = data.windowX;
 			socket.screenWidth = data.windowY;
 			socket.score = 0;
+			socket.camion = Camion;
+
 			// store the room name in the socket session for this client
 			// socket.room;
 			// add the client's username to the global list
-			usernames[socket.username] = data.prompt;
+			usernames[socket.username] = socket.username;
 
 			for (var i = 0; i < rooms.length; i++) {
 				if (rooms[i].profil.length < 2) {
@@ -107,12 +121,13 @@ module.exports = function(io) {
 			};
 
 			//launch the party
+			socket.emit('majScore', socket.score)
 			socket.emit('affichage', gameData);
 			if (socket.room.profil.length == 2) {
 				gameData.messageWait = 'GO GO GO';
 				// io.sockets.in(socket.room.name).emit('global',gameData.messageWait);
-				io.sockets.in(socket.room.name).emit('newTruck', Camion);
-				Camion.animationCamion();
+				io.sockets.in(socket.room.name).emit('newTruck', socket.camion);
+				socket.camion.animationCamion();
 			}
 
 			/////////
@@ -163,14 +178,15 @@ module.exports = function(io) {
 					carres[data.id].top = data.top;
 					carres[data.id].left = data.left;
 				}
-				// var checkCollision = function() {
+				// 	var checkCollision = function() {
 
-				// 	if (carres[data.id].top + carres[data.id].height >= Camion.y + Camion.height && carres[data.id].top <= Camion.y + Camion.height && carres[data.id].left + carres[data.id].width >= Camion.x && carres[data.id].left + carres[data.id].width <= Camion.x + Camion.width) {
-				// 		gameData.score -= 50;
-				// 		socket.emit('affichage', gameData);
-				// 		io.sockets.in(socket.room.name).emit('updatechat', socket.id, 'touché');
-				// 	}
-				// };
+				// 		if (carres[data.id].top + carres[data.id].height >= Camion.y + Camion.height && carres[data.id].top <= Camion.y + Camion.height && carres[data.id].left + carres[data.id].width >= Camion.x && carres[data.id].left + carres[data.id].width <= Camion.x + Camion.width) {
+
+				// 			carres[data.id].score -= 50;
+				// 			socket.emit('majScore', carres[data.id].score);
+				// 			io.sockets.in(socket.room.name).emit('updatechat', carres[data.id].name, 'touché');
+				// 		}
+				// 	};
 				// checkCollision();
 			});
 
@@ -193,12 +209,15 @@ module.exports = function(io) {
 				}
 			}
 			// remove the username from global usernames list
+			Camion = {};
 
 			socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
 			// socket.leave(socket.room.name);
 			// delete usernames[socket.username];
 			// update list of users in chat, client-side
 			delete socket.username;
+
+
 		});
 
 	});

@@ -2,7 +2,7 @@
     window.addEventListener('DOMContentLoaded', function() {
 
       var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
-      var socket = io('http://192.168.104.177:3000');
+      var socket = io('http://192.168.1.77:3000');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
@@ -20,13 +20,17 @@
       //////////
 
       socket.on('affichage', function(data) {
-        console.log(data)
         $('#rooms').html(data.room);
         $('#users').html(data.username);
-        $('#score').html(data.score)
       });
 
-      socket.on('global',function(data){
+      socket.on('majScore', function(data) {
+        console.log(data)
+        $('#score').html(data);
+
+      })
+
+      socket.on('global', function(data) {
         $('#game').html('<p>' + data + '</p>');
       })
 
@@ -69,25 +73,28 @@
       //////////
 
       socket.on('newTruck', function(data) {
+        var CamionElement = document.getElementById(data.id);
+
         var CamionElement = document.createElement('img');
+        CamionElement.id = data.id
+        game.appendChild(CamionElement)
         data.creation = function() {
           CamionElement.setAttribute('src', 'images/truck.png');
-          CamionElement.id = data.id
           CamionElement.style.top = data.y + "px";
           CamionElement.className = data.className;
           CamionElement.style.left = data.x + "px";
           CamionElement.style.height = data.height + "px";
           CamionElement.style.width = data.width + "px";
           CamionElement.style.position = data.position;
-          game.appendChild(CamionElement)
           return data; // pour le chainage
         };
 
         data.creation();
+
+
       });
       socket.on('majTruck', function(data) {
-        var CamionElement = document.getElementById(data.id)
-
+        var CamionElement = document.getElementById(data.id);
         CamionElement.style.left = data.x + 'px';
         CamionElement.style.top = data.y + 'px';
         CamionElement.style.width = data.width + 'px';
@@ -114,6 +121,13 @@
           HTMLDivElement.style.backgroundColor = data[index].backgroundColor;
           $(HTMLDivElement).append('<p>' + data[index].name + '</p>') // permet au premiers joueurs de voir le numéro des joueur qui se connectent après
         }
+        setInterval(function() {
+          socket.emit('collision', {
+            id: HTMLDivElement.id,
+            top: parseInt(HTMLDivElement.style.top),
+            left: parseInt(HTMLDivElement.style.left)
+          });
+        }, 250)
       });
 
       socket.on('detruireCarre', function(data) {
@@ -166,15 +180,8 @@
             top: parseInt(HTMLDivElement.style.top),
             left: parseInt(HTMLDivElement.style.left)
           });
-
         });
-        setInterval(function() {
-          socket.emit('collision', {
-            id: HTMLDivElement.id,
-            top: parseInt(HTMLDivElement.style.top),
-            left: parseInt(HTMLDivElement.style.left)
-          });
-        }, 250)
+
 
       });
 
@@ -192,9 +199,8 @@
         HTMLDivElement.style.height = data.height;
         HTMLDivElement.style.position = data.position;
         HTMLDivElement.style.backgroundColor = data.backgroundColor;
-        $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur connecté après voit le pseudo des autres
+        // $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur connecté après voit le pseudo des autres
       });
-
 
       socket.on('changerPositionnementDeSonCarre', function(data) {
         var HTMLDivElement = window.document.getElementById(data.id);
@@ -204,6 +210,7 @@
         }
 
       });
+
 
     });
   })(window, io);
