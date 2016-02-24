@@ -66,10 +66,10 @@ module.exports = function(grunt) {
 			}
 		},
 		watch: {
-			// scripts: {
-			// 	files: 'public/javascript/*.js', // tous les fichiers JavaScript de n'importe quel dossier
-			// 	tasks: ['uglify:dist']
-			// },
+			scripts: {
+				files: 'public/javascript/*.js', // tous les fichiers JavaScript de n'importe quel dossier
+				tasks: ['uglify:dist']
+			},
 			styles: {
 				files: '**/*.scss', // tous les fichiers Sass de n'importe quel dossier
 				tasks: ['sass:dist']

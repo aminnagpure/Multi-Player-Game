@@ -2,7 +2,7 @@
     window.addEventListener('DOMContentLoaded', function() {
 
       var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
-      var socket = io('http://192.168.1.77:3000');
+      var socket = io('http://192.168.104.177:3000');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
@@ -53,11 +53,15 @@
 
       var t = Math.round(Math.random() + 1)
 
-      //dis camion
+      ///////////////
+      //dis camion //
+      ///////////////
+
       socket.on('newTruck', function(data) {
-        var CamionElement = document.createElement('img')
+        var CamionElement = document.createElement('img');
         data.creation = function() {
           CamionElement.setAttribute('src', 'images/truck.png');
+          CamionElement.id = data.id
           CamionElement.style.top = data.y + "px";
           CamionElement.className = data.className;
           CamionElement.style.left = data.x + "px";
@@ -67,42 +71,19 @@
           game.appendChild(CamionElement)
           return data;
         };
-        data.animation = function() {
-          data.y = data.y + 2;
-          data.height = data.height + 0.9;
-          data.width = data.width + 1;
 
-
-          data.x -= t;
-
-          if (data.y >= game.offsetHeight - data.height) { // if end of the map
-            data.y = 200 + data.step;
-            data.width = 40;
-            data.height = 40;
-            data.x = 520;
-            t = Math.round(Math.random() * 3)
-          }
-          CamionElement.style.left = data.x + 'px';
-          CamionElement.style.top = data.y + 'px';
-          CamionElement.style.width = data.width + 'px';
-          CamionElement.style.height = data.height + 'px';
-
-          window.requestAnimationFrame(function() {
-            data.animation();
-          });
-          var objSend = {
-            y: data.y,
-            x: data.x,
-            width: data.width,
-            height: data.height
-          }
-          socket.emit('majTruck', objSend)
-        };
-
-        data.creation().animation();
+        data.creation()
       });
-
-      // premier joueur voit tout //deuxieme voit seulement le troisime joueur bouger et troisieme joueur ne voit rien 
+      socket.on('majTruck', function(data) {
+        var CamionElement = document.getElementById(data.id)
+        CamionElement.style.left = data.x + 'px';
+        CamionElement.style.top = data.y + 'px';
+        CamionElement.style.width = data.width + 'px';
+        CamionElement.style.height = data.height + 'px';
+      })
+      //////////
+      //carre //
+      //////////
       socket.on('creerLesAutresCarres', function(data) {
         for (index in data) {
 
@@ -121,7 +102,6 @@
           HTMLDivElement.style.backgroundColor = data[index].backgroundColor;
           $(HTMLDivElement).append('<p>' + data[index].name + '</p>') // permet au premiers joueurs de voir le numéro des joueur qui se connectent après
         }
-
       });
 
       socket.on('detruireCarre', function(data) {
@@ -137,7 +117,6 @@
         var HTMLDivElement = window.document.getElementById(data.id);
         $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur voit ca
 
-        $('#score').append('<p>score: ' + score + '</p>');
 
         if (!HTMLDivElement) {
 
@@ -151,27 +130,24 @@
         HTMLDivElement.style.height = data.height;
         HTMLDivElement.style.position = data.position;
         HTMLDivElement.style.backgroundColor = data.backgroundColor;
-        // permet au premiers joueurs de voir le numéro des joueur qui se connectent après
+
 
         window.addEventListener('keydown', function(e) {
           // var motoGame = $('#' + data.id).position();
           switch (e.keyCode) {
             case 39:
               e.preventDefault();
-
-              // HTMLDivElement.style.left = data.left + 10 + 'px';
-              // $('#' + data.id).css({
-              //   'left': motoGame.left + 10
-              // });
-              document.getElementById(data.id).style.left = parseFloat(document.getElementById(data.id).style.left) + 10 + 'px'
+              HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) + 10 + 'px';
+              if (HTMLDivElement.style.left >= '600px') {
+                HTMLDivElement.style.left = '600px'
+              }
               break;
             case 37:
               e.preventDefault();
-              // HTMLDivElement.style.left = data.left-10 + 'px';
-              // $('#' + data.id).css({
-              //   'left': motoGame.left - 10
-              // });
-              document.getElementById(data.id).style.left += '10px'
+              HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) - 10 + 'px'
+              if (HTMLDivElement.style.left <= '200px') {
+                HTMLDivElement.style.left = '200px'
+              }
               break;
           }
 
@@ -182,9 +158,15 @@
           });
 
         });
+        setInterval(function() {
+          socket.emit('collision', {
+            id: HTMLDivElement.id,
+            top: parseInt(HTMLDivElement.style.top),
+            left: parseInt(HTMLDivElement.style.left)
+          });
+        }, 250)
 
       });
-      //premier joueur peut afficher son carré sur le deuxiemen joueur mais le deusieme, joueuyr n'affiche pas son carré si desactiver
 
       socket.on('creerSonCarre', function(data) {
         var HTMLDivElement = window.document.getElementById(data.id);
@@ -203,8 +185,7 @@
         $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur connecté après voit le pseudo des autres
       });
 
-      // pour le joueur qui se connecte après si on desactive ce bout de code on voit pas son carre s'afficher a l'écran
-      // permet de voir le mouvement de l'autre carré
+
       socket.on('changerPositionnementDeSonCarre', function(data) {
         var HTMLDivElement = window.document.getElementById(data.id);
         if (HTMLDivElement) {
