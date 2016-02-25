@@ -103,17 +103,21 @@ abbr[title], dfn[title] {
 
 /* END RESET CSS */
 
+.wrapperGame{
+margin: 0 auto;
+width: 1000px;
+}
+
+
 #game {
   position: relative;
-  margin: 0 auto;
   background: url(../images/route-66-2.jpg) 50% 50%;
-  width: 1000px;
   height: 600px;
 // 
   @include desktop{
 
   }
-}
+}//
 
 #chat{
 
@@ -133,3 +137,7 @@ div[id^='/#'], .truck {
 }
 
 .camion{}
+
+#table{
+  display:none;
+}

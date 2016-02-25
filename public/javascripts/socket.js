@@ -2,7 +2,7 @@
     window.addEventListener('DOMContentLoaded', function() {
 
       var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
-      var socket = io('http://192.168.1.77:3000');
+      var socket = io('http://192.168.104.177:3000');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
@@ -26,13 +26,15 @@
 
       socket.on('majScore', function(data) {
         console.log(data)
-        $('#score').html(data);
+        $('#score').html(data)
 
       })
 
       socket.on('global', function(data) {
-        $('#game').html('<p>' + data + '</p>');
-      })
+        $('#nameUtil').fadeIn(200, function() {
+          $(this).html('<p> Le joueur : '+ data + 'a été touché !</p>').fadeOut();
+        });
+      });
 
       /////////
       //Chat //
@@ -73,8 +75,8 @@
       //////////
 
       socket.on('newTruck', function(data) {
-        var CamionElement = document.getElementById(data.id);
-
+        // var CamionElement = document.getElementById(data.id);
+        // console.log('test')
         var CamionElement = document.createElement('img');
         CamionElement.id = data.id
         game.appendChild(CamionElement)
@@ -91,15 +93,15 @@
 
         data.creation();
 
+        socket.on('majTruck', function(data) {
+          // var CamionElement = document.getElementById(data.id);
+          CamionElement.style.left = data.x + 'px';
+          CamionElement.style.top = data.y + 'px';
+          CamionElement.style.width = data.width + 'px';
+          CamionElement.style.height = data.height + 'px';
+        })
 
       });
-      socket.on('majTruck', function(data) {
-        var CamionElement = document.getElementById(data.id);
-        CamionElement.style.left = data.x + 'px';
-        CamionElement.style.top = data.y + 'px';
-        CamionElement.style.width = data.width + 'px';
-        CamionElement.style.height = data.height + 'px';
-      })
       //////////
       //carre //
       //////////
@@ -137,7 +139,7 @@
         };
       });
 
-      //creern'importe quel carré
+      //creer n'importe quel carré
       socket.on('creerMonCarre', function(data, username, score) {
 
         var HTMLDivElement = window.document.getElementById(data.id);
@@ -208,9 +210,12 @@
           HTMLDivElement.style.top = data.top;
           HTMLDivElement.style.left = data.left;
         }
+      });
+      socket.on('deco', function(data) {
+        console.log(data)
+        $('#truck').remove();
+        $('#table').show('slow');
 
       });
-
-
     });
   })(window, io);
