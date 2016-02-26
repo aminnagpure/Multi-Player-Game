@@ -10,7 +10,7 @@
           prompt: prompt("What's your name?"),
           windowX: window.innerWidth,
           windowY: window.innerHeight
-        }
+        };
         socket.emit('adduser', obj);
       });
       var game = document.getElementById('game');
@@ -32,7 +32,7 @@
 
       socket.on('global', function(data) {
         $('#nameUtil').fadeIn(200, function() {
-          $(this).html('<p> Le joueur : '+ data + 'a été touché !</p>').fadeOut();
+          $(this).html('<p> Le joueur : ' + data + 'a été touché !</p>').fadeOut();
         });
       });
 
@@ -69,7 +69,6 @@
       //////////////
       ///////////
 
-
       //////////
       //Truck //
       //////////
@@ -77,9 +76,13 @@
       socket.on('newTruck', function(data) {
         // var CamionElement = document.getElementById(data.id);
         // console.log('test')
-        var CamionElement = document.createElement('img');
-        CamionElement.id = data.id
-        game.appendChild(CamionElement)
+        var CamionElement = document.getElementById(data.id)
+        if(!CamionElement){
+          var CamionElement = document.createElement('img');
+          CamionElement.id = data.id
+          game.appendChild(CamionElement)          
+        }
+
         data.creation = function() {
           CamionElement.setAttribute('src', 'images/truck.png');
           CamionElement.style.top = data.y + "px";
@@ -88,7 +91,7 @@
           CamionElement.style.height = data.height + "px";
           CamionElement.style.width = data.width + "px";
           CamionElement.style.position = data.position;
-          return data; // pour le chainage
+
         };
 
         data.creation();
@@ -99,6 +102,8 @@
           CamionElement.style.top = data.y + 'px';
           CamionElement.style.width = data.width + 'px';
           CamionElement.style.height = data.height + 'px';
+
+          socket.emit('newCoor')
         })
 
       });
@@ -123,13 +128,7 @@
           HTMLDivElement.style.backgroundColor = data[index].backgroundColor;
           $(HTMLDivElement).append('<p>' + data[index].name + '</p>') // permet au premiers joueurs de voir le numéro des joueur qui se connectent après
         }
-        setInterval(function() {
-          socket.emit('collision', {
-            id: HTMLDivElement.id,
-            top: parseInt(HTMLDivElement.style.top),
-            left: parseInt(HTMLDivElement.style.left)
-          });
-        }, 250)
+
       });
 
       socket.on('detruireCarre', function(data) {
@@ -184,6 +183,13 @@
           });
         });
 
+        setInterval(function() {
+          socket.emit('collision', {
+            id: HTMLDivElement.id,
+            top: parseInt(HTMLDivElement.style.top),
+            left: parseInt(HTMLDivElement.style.left)
+          });
+        }, 250);
 
       });
 
@@ -202,6 +208,7 @@
         HTMLDivElement.style.position = data.position;
         HTMLDivElement.style.backgroundColor = data.backgroundColor;
         // $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur connecté après voit le pseudo des autres
+
       });
 
       socket.on('changerPositionnementDeSonCarre', function(data) {
@@ -213,8 +220,10 @@
       });
       socket.on('deco', function(data) {
         console.log(data)
-        $('#truck').remove();
-        $('#table').show('slow');
+        
+        var CamionElement = document.getElementById(data.id);
+        CamionElement.remove();
+        $('#table').show(2000);
 
       });
     });

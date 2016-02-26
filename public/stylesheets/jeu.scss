@@ -108,7 +108,6 @@ margin: 0 auto;
 width: 1000px;
 }
 
-
 #game {
   position: relative;
   background: url(../images/route-66-2.jpg) 50% 50%;
@@ -117,14 +116,12 @@ width: 1000px;
   @include desktop{
 
   }
-}//
+  
+}
 
 #chat{
-
     width:100%;
 
-  @include tablet{
-  }
 }//
 
 .ready {
