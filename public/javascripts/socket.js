@@ -1,19 +1,31 @@
   (function(window, io) {
     window.addEventListener('DOMContentLoaded', function() {
 
-      var httpPort = 'http://192.168.104.177:3000' || 'http://192.168.1.77:3000'
-      var socket = io('http://192.168.104.177:3000');
+      var httpPort = 'http://192.168.104.177:3000' || ''
+      var socket = io('http://192.168.1.77:3000');
+      var game = document.getElementById('game');
 
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
+
+      });
+      $('#validationName').on("submit", function(e) {
+
+        e.preventDefault();
+        var name = $('#surname').val()
+
         var obj = {
-          prompt: prompt("What's your name?"),
+          prompt: name,
           windowX: window.innerWidth,
           windowY: window.innerHeight
         };
+        name = $('#surname').val('');
+        $(".removeClass").fadeOut(1000, function() {
+          $(this).remove();
+        });
+        $("#chat").fadeIn(1000)
         socket.emit('adduser', obj);
       });
-      var game = document.getElementById('game');
 
       //////////
       //Affichage //
@@ -77,10 +89,10 @@
         // var CamionElement = document.getElementById(data.id);
         // console.log('test')
         var CamionElement = document.getElementById(data.id)
-        if(!CamionElement){
+        if (!CamionElement) {
           var CamionElement = document.createElement('img');
-          CamionElement.id = data.id
-          game.appendChild(CamionElement)          
+          CamionElement.id = data.id;
+          game.appendChild(CamionElement)
         }
 
         data.creation = function() {
@@ -163,15 +175,15 @@
             case 39:
               e.preventDefault();
               HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) + 10 + 'px';
-              if (HTMLDivElement.style.left >= '600px') {
-                HTMLDivElement.style.left = '600px'
+              if (HTMLDivElement.style.left >= '700px') {
+                HTMLDivElement.style.left = '700px'
               }
               break;
             case 37:
               e.preventDefault();
               HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) - 10 + 'px'
-              if (HTMLDivElement.style.left <= '200px') {
-                HTMLDivElement.style.left = '200px'
+              if (HTMLDivElement.style.left <= '300px') {
+                HTMLDivElement.style.left = '300px'
               }
               break;
           }
@@ -219,12 +231,21 @@
         }
       });
       socket.on('deco', function(data) {
-        console.log(data)
-        
+
         var CamionElement = document.getElementById(data.id);
-        CamionElement.remove();
+        if (CamionElement) {
+          CamionElement.remove();
+        }
         $('#table').show(2000);
 
+      });
+
+      socket.on('endOfGame', function(data) {
+        var CamionElement = document.getElementById(data.camion.id);
+        CamionElement.remove();
+        console.log(data)
+        $('#table').show(2000);
+        $('#winner').append(data.utilisateur + ' gagne la partie avec un score de ' + data.score);
       });
     });
   })(window, io);

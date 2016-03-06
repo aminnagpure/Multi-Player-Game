@@ -1,28 +1,36 @@
 html
   head
+    link(rel='stylesheet', type='text/css', href='bower_components/bootstrap/dist/css/bootstrap.min.css')
     link(rel='stylesheet', type='text/css', href='stylesheets/jeu.css')
   body
-    h1 Page de Jeu
-    p start the game
-    #chat
-      #tableauScore
-      div(style='float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;')
-        b ROOMS
-        #rooms
-        #users
-        #score
-      div(style='float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;')
-        #conversation
-        input#data(style='width:200px;')
-        input#datasend(type='button', value='send')
-    form
-      input.surname
-      input#ok(type='button', value='send')
-    #game.wrapperGame
-      #nameUtil
-    #table.wrapperGame Un tableau
+    .container
+      .row
+        h1.text-center On the road Again ! 
+        .col-xs-12.removeClass
+          h4.text-center.mainRole Choose your Name
+          form#validationName
+            input#surname
+            input#ok(type='button', value='send')
+    .container
+      .row
+        #game.wrapperGame.col-md-9
+          #nameUtil
+          #winner
+          #chat
+            div(style='float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;')
+              b Partie
+              #rooms
+              #users
+              #score
+            #conversation
+            div(style='float:left;width:300px;height:50px;overflow:scroll-y;padding:10px;')
+              input#data(style='width:200px;')
+              input#datasend(type='button', value='submit')
+    .container
+      .row
+        #table.wrapperGame Un tableau
       //- img(src="images/route-66-2.jpg")
-script(type="text/javascript", src="https://code.jquery.com/jquery-2.2.0.min.js")
+script(type="text/javascript", src="bower_components/jquery/jquery.min.js")
 script(type="text/javascript", src="bower_components/jquery-ui/jquery-ui.min.js")
 script(type="text/javascript", src="/socket.io/socket.io.js")
 script(type="text/javascript", src="javascripts/socket.js")

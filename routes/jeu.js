@@ -21,14 +21,13 @@ module.exports = function(io) {
 			name: 'room1',
 			profil: []
 		}
-
 	];
 	var carres = {};
 	io.sockets.on('connection', function(socket) {
 		var Camion = {
 			y: 200,
 			step: Math.round(Math.random() + 1),
-			x: 520,
+			x: 600,
 			id: 'truck',
 			width: 40,
 			className: 'camion',
@@ -48,23 +47,34 @@ module.exports = function(io) {
 					that.y = 200;
 					that.width = 40;
 					that.height = 40;
-					that.x = 520;
+					that.x = 600;
 					for (index in carres) {
 						if (!carres[index].isTouched) {
 							carres[index].score += 200
 							io.to(carres[index].id).emit('majScore', carres[index].score)
 						}
 						carres[index].isTouched = false;
+						//End of the game
+						var endOfGame = {
+							score: carres[index].score,
+							utilisateur: carres[index].name,
+							camion: socket.camion
+						};
+						if (carres[index].score > 500) {
+							io.sockets.in(socket.room.name).emit('endOfGame', endOfGame);
+						}
 					}
 				}
 				var checkCollision = function() {
 					for (index in carres) {
+						//check if a moto is on conflict with the truck
 						if (carres[index].top + carres[index].height >= Camion.y + Camion.height && carres[index].top <= Camion.y + Camion.height && carres[index].left + carres[index].width >= Camion.x && carres[index].left + carres[index].width <= Camion.x + Camion.width) {
 							carres[index].isTouched = true;
+							if(carres[index].score < 500){
 							carres[index].score -= 50;
-
-							io.sockets.in(socket.room.name).emit('global', carres[index].name)
-							io.to(carres[index].id).emit('majScore', carres[index].score)	
+							}
+							io.sockets.in(socket.room.name).emit('global', carres[index].name);
+							io.to(carres[index].id).emit('majScore', carres[index].score)
 						}
 					}
 				};
@@ -106,13 +116,13 @@ module.exports = function(io) {
 			// socket.emit('majScore', socket.score)
 			socket.emit('affichage', gameData);
 			if (socket.room.profil.length == 2) {
-					io.sockets.in(socket.room.name).emit('newTruck', socket.camion);
-					socket.camion.animationCamion();
-					socket.on('newCoor', function(data) {
-						setTimeout(function(){
+				io.sockets.in(socket.room.name).emit('newTruck', socket.camion);
+				socket.camion.animationCamion();
+				socket.on('newCoor', function(data) {
+					setTimeout(function() {
 						socket.camion.animationCamion();
-						}, 20)
-					});
+					}, 10)
+				});
 
 				io.sockets.in(socket.room.name).emit('global', gameData.messageWait);
 			}
