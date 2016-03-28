@@ -17,6 +17,7 @@ var store = new MongoDBStore({
   uri: 'mongodb://localhost:27017/jeu',
   collection: 'mySessions'
 });
+
 app.mongoClient = MongoClient;
 app.locals.moment = require('moment');
 // Socket.io

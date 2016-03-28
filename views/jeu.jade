@@ -6,14 +6,14 @@ html
     .container
       .row
         h1.text-center On the road Again ! 
-        .col-xs-12.removeClass
+      
           h4.text-center.mainRole Choose your Name
-          form#validationName
-            input#surname
-            input#ok(type='button', value='send')
-    .container
-      .row
-        #game.wrapperGame.col-md-9
+          div#validationName
+            form.removeClass.form-inline.col-lg-offset-4(action="")
+              input.form-group(type="text" placeholder="John Marlboro").form-control#surname
+              input.btn.btn-default#ok(type='submit', value='send')
+        #game.wrapperGame
+          img.introImage(src="images/motogame.jpg")
           #nameUtil
           #winner
           #chat
@@ -23,7 +23,7 @@ html
               #users
               #score
             #conversation
-            div(style='float:left;width:300px;height:50px;overflow:scroll-y;padding:10px;')
+            div(style='float:left;width:180px;height:50px;overflow:scroll-y;padding:10px;')
               input#data(style='width:200px;')
               input#datasend(type='button', value='submit')
     .container

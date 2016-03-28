@@ -3,10 +3,8 @@ module.exports = function(io) {
 	var router = app.Router();
 	var carres = {};
 	router.get('/', function(req, res, next) {
-		var jeu = maDb.collection('jeu');
-		jeu.find({}).toArray(function() {
+		
 
-		})
 		res.render('jeu', {
 			title: 'Un test'
 			// login: 
@@ -16,14 +14,14 @@ module.exports = function(io) {
 	// usernames which are currently connected to the chat
 	var usernames = {};
 	// rooms which are currently available in chat
-
 	var rooms = [{
-			name: 'room1',
-			profil: []
-		}
+		name: 'room1',
+		profil: []
+	}
 	];
 	var carres = {};
 	io.sockets.on('connection', function(socket) {
+	var end = false;
 		var Camion = {
 			y: 200,
 			step: Math.round(Math.random() + 1),
@@ -36,13 +34,12 @@ module.exports = function(io) {
 			choice: Math.round(Math.random() * 5),
 			animationCamion: function() {
 				var that = this;
-				// var ti = setInterval(function() {
+
 				that.y += 3;
 				that.x += that.tabPosition[that.choice];
 				that.height = that.height + 0.9;
 				that.width = that.width + 1;
-
-				if (that.y + that.height >= 600) { // position basse de la div jeu
+				if (that.y + that.height >= 600) { 
 					that.choice = Math.round(Math.random() * 4);
 					that.y = 200;
 					that.width = 40;
@@ -61,7 +58,9 @@ module.exports = function(io) {
 							camion: socket.camion
 						};
 						if (carres[index].score > 500) {
+							end = true;
 							io.sockets.in(socket.room.name).emit('endOfGame', endOfGame);
+
 						}
 					}
 				}
@@ -71,21 +70,22 @@ module.exports = function(io) {
 						if (carres[index].top + carres[index].height >= Camion.y + Camion.height && carres[index].top <= Camion.y + Camion.height && carres[index].left + carres[index].width >= Camion.x && carres[index].left + carres[index].width <= Camion.x + Camion.width) {
 							carres[index].isTouched = true;
 							if(carres[index].score < 500){
-							carres[index].score -= 50;
+								carres[index].score -= 50;
 							}
 							io.sockets.in(socket.room.name).emit('global', carres[index].name);
 							io.to(carres[index].id).emit('majScore', carres[index].score)
 						}
 					}
 				};
+
 				checkCollision();
+
 				io.sockets.in(socket.room.name).emit('majTruck', that);
-				// }, 16);
 			},
 			tabPosition: [-3, -2, -1, 0, 1],
 		};
 
-		console.log('connéecté');
+		console.log('connécté');
 		socket.on('adduser', function(data) {
 			// store the username in the socket session for this client
 			socket.username = data.prompt;
@@ -116,15 +116,21 @@ module.exports = function(io) {
 			// socket.emit('majScore', socket.score)
 			socket.emit('affichage', gameData);
 			if (socket.room.profil.length == 2) {
+				console.log(socket.room)
 				io.sockets.in(socket.room.name).emit('newTruck', socket.camion);
+				// if the game continue
 				socket.camion.animationCamion();
-				socket.on('newCoor', function(data) {
-					setTimeout(function() {
-						socket.camion.animationCamion();
-					}, 10)
-				});
 
-				io.sockets.in(socket.room.name).emit('global', gameData.messageWait);
+					socket.on('newCoor', function(data) {
+						if(!end){
+							setTimeout(function() {
+								socket.camion.animationCamion();
+							}, 10)
+						}
+					});
+
+					io.sockets.in(socket.room.name).emit('global', gameData.messageWait);
+				
 			}
 
 			/////////
@@ -142,7 +148,7 @@ module.exports = function(io) {
 			});
 			var carre = {
 				top: 500,
-				left: 480,
+				left:355,
 				id: socket.id,
 				isTouched: false,
 				score: socket.score,
@@ -182,6 +188,7 @@ module.exports = function(io) {
 
 		//when the user disconnects.. perform this
 		socket.on('disconnect', function() {
+
 			console.log('passé par déconnection')
 			io.emit('deco', socket.camion)
 			if (socket.room) {
@@ -195,8 +202,9 @@ module.exports = function(io) {
 				// delete usernames[socket.username];
 				// update list of users in chat, client-side
 				delete socket.username;
+
+
 			}
-			var jeu = maDb.collection('jeu');
 			for (index in carres) {
 				jeu.insert({
 					login: carres[index].name,

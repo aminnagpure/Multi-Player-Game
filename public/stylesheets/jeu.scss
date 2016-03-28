@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css?family=Vast+Shadow);
 $blue: #1492e0;
 $black:#000; //
 $back-grey:#dcdbdb;
@@ -103,6 +104,11 @@ abbr[title], dfn[title] {
 
 /* END RESET CSS */
 
+
+body{
+font-family: 'Vast Shadow', serif;
+}
+
 .wrapperGame{
 margin: 0 auto;
 width: 1000px;
@@ -113,11 +119,7 @@ width: 1000px;
     width: 100%;
   background: url(../images/route-66-2.jpg) 50% 50%;
   height: 600px;
-
-// 
-  @include desktop{
-
-  }
+  position: relative;
   
 }
 
@@ -126,16 +128,15 @@ width: 1000px;
 }
 
 #validationName{
-  margin:0 auto;
-  width: 200px;
-  padding-bottom:15px;
+margin : 0 auto;
+width:100%;
 }
 
 #chat{
 display:none;
 position: absolute;
-left:800px;
-width:650px;
+left:66%;
+width:400px;
 background-color: #FFF
 }//
 
@@ -152,4 +153,8 @@ div[id^='/#'], .truck {
 
 #table{
   display:none;
+}
+
+input[placeholder="John Marlboro"]{
+  padding-left:50px
 }

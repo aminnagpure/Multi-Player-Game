@@ -23,7 +23,10 @@
         $(".removeClass").fadeOut(1000, function() {
           $(this).remove();
         });
+        $('.introImage').hide( "explode", {pieces: 16 }, 2000 ,function(){
+         this.remove(); 
         $("#chat").fadeIn(1000)
+        })
         socket.emit('adduser', obj);
       });
 
@@ -37,7 +40,6 @@
       });
 
       socket.on('majScore', function(data) {
-        console.log(data)
         $('#score').html(data)
 
       })
@@ -99,16 +101,15 @@
           CamionElement.setAttribute('src', 'images/truck.png');
           CamionElement.style.top = data.y + "px";
           CamionElement.className = data.className;
-          CamionElement.style.left = data.x + "px";
+          CamionElement.style.left = data.x + 'px';
           CamionElement.style.height = data.height + "px";
           CamionElement.style.width = data.width + "px";
           CamionElement.style.position = data.position;
-
         };
 
         data.creation();
 
-        socket.on('majTruck', function(data) {
+        socket.on('majTruck', function(data, hh) {
           // var CamionElement = document.getElementById(data.id);
           CamionElement.style.left = data.x + 'px';
           CamionElement.style.top = data.y + 'px';
@@ -182,8 +183,8 @@
             case 37:
               e.preventDefault();
               HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) - 10 + 'px'
-              if (HTMLDivElement.style.left <= '300px') {
-                HTMLDivElement.style.left = '300px'
+              if (HTMLDivElement.style.left <= '500px') {
+                HTMLDivElement.style.left = '500px'
               }
               break;
           }
@@ -230,21 +231,27 @@
           HTMLDivElement.style.left = data.left;
         }
       });
-      socket.on('deco', function(data) {
+      socket.on('deco', function(data,tab) {
 
         var CamionElement = document.getElementById(data.id);
+        console.log(data)
         if (CamionElement) {
           CamionElement.remove();
         }
         $('#table').show(2000);
+        $('#table').append('<p>'+tab+'</p>');
+
 
       });
 
-      socket.on('endOfGame', function(data) {
+      socket.on('endOfGame', function(data,tabScore) {
         var CamionElement = document.getElementById(data.camion.id);
-        CamionElement.remove();
+        if (CamionElement) CamionElement.remove();
+     
         console.log(data)
         $('#table').show(2000);
+        $('#table').append('<p>'+tabScore+'</p>');
+
         $('#winner').append(data.utilisateur + ' gagne la partie avec un score de ' + data.score);
       });
     });
