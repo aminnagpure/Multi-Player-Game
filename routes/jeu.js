@@ -3,14 +3,20 @@ module.exports = function(io) {
 	var router = app.Router();
 	var carres = {};
 	router.get('/', function(req, res, next) {
-		
+		var jeu = maDb.collection('jeu');
+		jeu.find({}).limit(10).sort({score:-1}).toArray(function(err, data) {
+		if (err) {
+			console.log('error mongo');
+		} else {
 
+		}
+		
 		res.render('jeu', {
-			title: 'Un test'
+			data: data
 			// login: 
 		})
 	});
-
+	});
 	// usernames which are currently connected to the chat
 	var usernames = {};
 	// rooms which are currently available in chat
@@ -21,7 +27,7 @@ module.exports = function(io) {
 	];
 	var carres = {};
 	io.sockets.on('connection', function(socket) {
-	var end = false;
+		var end = false;
 		var Camion = {
 			y: 200,
 			step: Math.round(Math.random() + 1),
@@ -47,15 +53,16 @@ module.exports = function(io) {
 					that.x = 600;
 					for (index in carres) {
 						if (!carres[index].isTouched) {
-							carres[index].score += 200
+							carres[index].score += 100
 							io.to(carres[index].id).emit('majScore', carres[index].score)
 						}
 						carres[index].isTouched = false;
 						//End of the game
+						var jeu = maDb.collection('jeu');
 						var endOfGame = {
 							score: carres[index].score,
 							utilisateur: carres[index].name,
-							camion: socket.camion
+							camion: socket.camion,
 						};
 						if (carres[index].score > 500) {
 							end = true;
@@ -121,15 +128,15 @@ module.exports = function(io) {
 				// if the game continue
 				socket.camion.animationCamion();
 
-					socket.on('newCoor', function(data) {
-						if(!end){
-							setTimeout(function() {
-								socket.camion.animationCamion();
-							}, 10)
-						}
-					});
+				socket.on('newCoor', function(data) {
+					if(!end){
+						setTimeout(function() {
+							socket.camion.animationCamion();
+						}, 10)
+					}
+				});
 
-					io.sockets.in(socket.room.name).emit('global', gameData.messageWait);
+				io.sockets.in(socket.room.name).emit('global', gameData.messageWait);
 				
 			}
 
@@ -148,7 +155,7 @@ module.exports = function(io) {
 			});
 			var carre = {
 				top: 500,
-				left:355,
+				left:500,
 				id: socket.id,
 				isTouched: false,
 				score: socket.score,
@@ -190,6 +197,8 @@ module.exports = function(io) {
 		socket.on('disconnect', function() {
 
 			console.log('passé par déconnection')
+			var jeu = maDb.collection('jeu');
+
 			io.emit('deco', socket.camion)
 			if (socket.room) {
 				for (var i = 0; i < 2; i++) {
@@ -202,8 +211,6 @@ module.exports = function(io) {
 				// delete usernames[socket.username];
 				// update list of users in chat, client-side
 				delete socket.username;
-
-
 			}
 			for (index in carres) {
 				jeu.insert({

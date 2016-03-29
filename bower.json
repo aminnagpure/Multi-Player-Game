@@ -14,10 +14,10 @@
     "html5shiv": "latest",
     "box-sizing-polyfill": "latest",
     "modernizr": "latest",
-    "jquery": "1.10.2",
     "bootstrap": "^3.3.6",
-    "moment":"latest",
-    "jasmine":"latest"
+    "moment": "latest",
+    "jasmine": "latest",
+    "jquery-2.2.2.min": "http://code.jquery.com/jquery-2.2.2.min.js"
   },
   "homepage": "",
   "private": true,

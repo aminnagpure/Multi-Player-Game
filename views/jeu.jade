@@ -2,6 +2,7 @@ html
   head
     link(rel='stylesheet', type='text/css', href='bower_components/bootstrap/dist/css/bootstrap.min.css')
     link(rel='stylesheet', type='text/css', href='stylesheets/jeu.css')
+    link(rel="stylesheet", type='text/css', href='bower_components/bootstrap-sweetalert/lib/sweet-alert.css')  
   body
     .container
       .row
@@ -14,6 +15,7 @@ html
               input.btn.btn-default#ok(type='submit', value='send')
         #game.wrapperGame
           img.introImage(src="images/motogame.jpg")
+          .explanation How to Play
           #nameUtil
           #winner
           #chat
@@ -23,14 +25,40 @@ html
               #users
               #score
             #conversation
-            div(style='float:left;width:180px;height:50px;overflow:scroll-y;padding:10px;')
-              input#data(style='width:200px;')
-              input#datasend(type='button', value='submit')
+            div.form-inline.form-group
+              input.form-control.form-inline#data
+              input.btn.btn-default.form-inline#datasend(type='button', value='submit')
     .container
       .row
-        #table.wrapperGame Un tableau
+        button.btn.btn-success.btn-lg(data-toggle='modal', data-target='#myModal') Best Scores
+  #myModal.modal.fade
+    .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+            |                 
+            h4.modal-title Congratulations, you're a Bad Ass
+          |             
+          .modal-body
+            .table-responsive       
+              table.table-hover
+                tr
+                  th Login
+                  th Score
+                each val in data
+                  tr
+                    td= val.login  
+                    td= val.score
+                     
+          .modal-footer
+            row
+              .col-md-offset-4
+              button.btn.btn-default.centered(type='button', data-dismiss='modal') Close
+                  
       //- img(src="images/route-66-2.jpg")
 script(type="text/javascript", src="bower_components/jquery/jquery.min.js")
 script(type="text/javascript", src="bower_components/jquery-ui/jquery-ui.min.js")
 script(type="text/javascript", src="/socket.io/socket.io.js")
+script(src="bower_components/bootstrap/dist/js/bootstrap.min.js")
 script(type="text/javascript", src="javascripts/socket.js")
+script(src="bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js")

@@ -2,9 +2,16 @@
     window.addEventListener('DOMContentLoaded', function() {
 
       var httpPort = 'http://192.168.104.177:3000' || ''
-      var socket = io('http://192.168.1.77:3000');
+      /* var socket = io('http://ppprevost-javascript.herokuapp.com');*/
+      var socket = io('http://192.168.1.77:3000')
       var game = document.getElementById('game');
-
+      $('.explanation').click(function(){
+        swal({
+          title: "Let's get back to Texas!",
+          imageUrl: 'images/truck.png',
+          text:'Drive and be Free but be careful to these boring trucks ! Wait for your opponent and win 600 points before him ! Good luck !'
+        });
+      })
       socket.on('connect', function() {
         // call the server-side function 'adduser' and send one parameter (value of prompt)
 
@@ -12,22 +19,29 @@
       $('#validationName').on("submit", function(e) {
 
         e.preventDefault();
-        var name = $('#surname').val()
 
-        var obj = {
-          prompt: name,
-          windowX: window.innerWidth,
-          windowY: window.innerHeight
-        };
-        name = $('#surname').val('');
-        $(".removeClass").fadeOut(1000, function() {
-          $(this).remove();
-        });
-        $('.introImage').hide( "explode", {pieces: 16 }, 2000 ,function(){
-         this.remove(); 
-        $("#chat").fadeIn(1000)
-        })
-        socket.emit('adduser', obj);
+
+        if ($('#surname').val()== ""){
+          swal('Hey What\'s your name?')
+        
+        } else{
+        var name = $('#surname').val()
+          var obj = {
+            prompt: name,
+            windowX: window.innerWidth,
+            windowY: window.innerHeight
+          };
+          socket.emit('adduser', obj);
+          name = $('#surname').val('');
+          $(".removeClass").fadeOut(1000, function() {
+            $(this).remove();
+          });
+          $('.introImage').hide( "explode", {pieces: 16 }, 2000 ,function(){
+           this.remove(); 
+           $('.explanation').remove();
+           $("#chat").fadeIn(1000)
+         })
+        }
       });
 
       //////////
@@ -174,19 +188,19 @@
           // var motoGame = $('#' + data.id).position();
           switch (e.keyCode) {
             case 39:
-              e.preventDefault();
-              HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) + 10 + 'px';
-              if (HTMLDivElement.style.left >= '700px') {
-                HTMLDivElement.style.left = '700px'
-              }
-              break;
+            e.preventDefault();
+            HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) + 10 + 'px';
+            if (HTMLDivElement.style.left >= '700px') {
+              HTMLDivElement.style.left = '700px'
+            }
+            break;
             case 37:
-              e.preventDefault();
-              HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) - 10 + 'px'
-              if (HTMLDivElement.style.left <= '500px') {
-                HTMLDivElement.style.left = '500px'
-              }
-              break;
+            e.preventDefault();
+            HTMLDivElement.style.left = parseFloat(HTMLDivElement.style.left) - 10 + 'px'
+            if (HTMLDivElement.style.left <= '500px') {
+              HTMLDivElement.style.left = '500px'
+            }
+            break;
           }
 
           socket.emit('changerPositionnementDeMonCarre', {
@@ -206,53 +220,51 @@
 
       });
 
-      socket.on('creerSonCarre', function(data) {
-        var HTMLDivElement = window.document.getElementById(data.id);
-        if (!HTMLDivElement) {
-          var HTMLDivElement = window.document.createElement('div');
-          HTMLDivElement.id = data.id;
-          game.appendChild(HTMLDivElement);
-        }
+  socket.on('creerSonCarre', function(data) {
+    var HTMLDivElement = window.document.getElementById(data.id);
+    if (!HTMLDivElement) {
+      var HTMLDivElement = window.document.createElement('div');
+      HTMLDivElement.id = data.id;
+      game.appendChild(HTMLDivElement);
+    }
 
-        HTMLDivElement.style.top = data.top;
-        HTMLDivElement.style.left = data.left;
-        HTMLDivElement.style.width = data.width;
-        HTMLDivElement.style.height = data.height;
-        HTMLDivElement.style.position = data.position;
-        HTMLDivElement.style.backgroundColor = data.backgroundColor;
+    HTMLDivElement.style.top = data.top;
+    HTMLDivElement.style.left = data.left;
+    HTMLDivElement.style.width = data.width;
+    HTMLDivElement.style.height = data.height;
+    HTMLDivElement.style.position = data.position;
+    HTMLDivElement.style.backgroundColor = data.backgroundColor;
         // $(HTMLDivElement).append('<p>' + data.name + '</p>') // seul l'utilisateur connecté après voit le pseudo des autres
 
       });
 
-      socket.on('changerPositionnementDeSonCarre', function(data) {
-        var HTMLDivElement = window.document.getElementById(data.id);
-        if (HTMLDivElement) {
-          HTMLDivElement.style.top = data.top;
-          HTMLDivElement.style.left = data.left;
-        }
-      });
-      socket.on('deco', function(data,tab) {
+  socket.on('changerPositionnementDeSonCarre', function(data) {
+    var HTMLDivElement = window.document.getElementById(data.id);
+    if (HTMLDivElement) {
+      HTMLDivElement.style.top = data.top;
+      HTMLDivElement.style.left = data.left;
+    }
+  });
+  socket.on('deco', function(data,tab) {
 
-        var CamionElement = document.getElementById(data.id);
-        console.log(data)
-        if (CamionElement) {
-          CamionElement.remove();
-        }
-        $('#table').show(2000);
-        $('#table').append('<p>'+tab+'</p>');
+    var CamionElement = data? document.getElementById(data.id) : null;
+    if (CamionElement) {
+      CamionElement.remove();
+    }
+    $('#table').show(2000);
+
+  });
+
+  socket.on('endOfGame', function(data, dd) {
+    var CamionElement = document.getElementById(data.camion.id);
+    if (CamionElement) CamionElement.remove();
 
 
-      });
+    $('#table').show(2000);
+    $("#myModal").modal('show');
 
-      socket.on('endOfGame', function(data,tabScore) {
-        var CamionElement = document.getElementById(data.camion.id);
-        if (CamionElement) CamionElement.remove();
-     
-        console.log(data)
-        $('#table').show(2000);
-        $('#table').append('<p>'+tabScore+'</p>');
 
-        $('#winner').append(data.utilisateur + ' gagne la partie avec un score de ' + data.score);
-      });
-    });
-  })(window, io);
+    $('#winner').append(data.utilisateur + ' gagne la partie avec un score de ' + data.score);
+  });
+});
+})(window, io);
