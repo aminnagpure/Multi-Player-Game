@@ -7,7 +7,6 @@ html
     .container
       .row
         h1.text-center On the road Again ! 
-      
           h4.text-center.mainRole Choose your Name
           div#validationName
             form.removeClass.form-inline.col-lg-offset-4(action="")
@@ -20,14 +19,14 @@ html
           #winner
           #chat
             div(style='float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;')
-              b Partie
+              h4 Partie
               #rooms
               #users
               #score
             #conversation
             div.form-inline.form-group
               input.form-control.form-inline#data
-              input.btn.btn-default.form-inline#datasend(type='button', value='submit')
+              input.btn.btn-default.form-inline#datasend(type='button', value='Chat!')
     .container
       .row
         button.btn.btn-success.btn-lg(data-toggle='modal', data-target='#myModal') Best Scores
@@ -37,8 +36,7 @@ html
           .modal-header
             button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
             |                 
-            h4.modal-title Congratulations, you're a Bad Ass
-          |             
+            h4.modal-title  
           .modal-body
             .table-responsive       
               table.table-hover

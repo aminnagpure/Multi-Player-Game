@@ -23,9 +23,9 @@
 
         if ($('#surname').val()== ""){
           swal('Hey What\'s your name?')
-        
+
         } else{
-        var name = $('#surname').val()
+          var name = $('#surname').val()
           var obj = {
             prompt: name,
             windowX: window.innerWidth,
@@ -49,12 +49,17 @@
       //////////
 
       socket.on('affichage', function(data) {
-        $('#rooms').html(data.room);
-        $('#users').html(data.username);
+        console.log(data)
+
+        $('#rooms').html('<p>'+data.room+'</p>');
+        $('#users').html('');
+        for (var i = 0; i < data.username.length; i++) {
+          $('#users').append('<p>Moto'+[i+1]+': '+data.username[i]+'</p>');
+        };
       });
 
       socket.on('majScore', function(data) {
-        $('#score').html(data)
+        $('#score').html('<p>Score : ' + data + '</p>')
 
       })
 
@@ -77,10 +82,12 @@
       $(function() {
         // when the client clicks SEND
         $('#datasend').click(function() {
-          var message = $('#data').val();
-          $('#data').val('');
+         var message = $('#data').val();
           // tell server to execute 'sendchat' and send along one parameter
-          socket.emit('sendchat', message);
+          if($('#data').val()!=""){  
+            socket.emit('sendchat', message);
+          }
+          $('#data').val('');
         });
         // when the client hits ENTER on their keyboard
         $('#data').keypress(function(e) {
@@ -158,11 +165,18 @@
 
       });
 
-      socket.on('detruireCarre', function(data) {
+      socket.on('detruireCarre', function(data,utilisateur) { // apres une déconnection
         var HTMLDivElement = window.document.getElementById(data.id);
+        console.log(data)
         if (HTMLDivElement) {
           HTMLDivElement.remove();
         };
+        $("#myModal").modal('show');
+        var CamionElement = data? document.getElementById(data.id) : null;
+        if (CamionElement) {
+          CamionElement.remove();
+        }
+        $('.modal-title').html('Sorry '+data.name+ ' has disconnected')
       });
 
       //creer n'importe quel carré
@@ -245,26 +259,24 @@
       HTMLDivElement.style.left = data.left;
     }
   });
-  socket.on('deco', function(data,tab) {
+/*  socket.on('deco', function(data,tab) {
 
-    var CamionElement = data? document.getElementById(data.id) : null;
-    if (CamionElement) {
-      CamionElement.remove();
-    }
-    $('#table').show(2000);
 
-  });
+    $("#myModal").modal('show');
+
+  });*/
 
   socket.on('endOfGame', function(data, dd) {
     var CamionElement = document.getElementById(data.camion.id);
     if (CamionElement) CamionElement.remove();
-
-
-    $('#table').show(2000);
     $("#myModal").modal('show');
 
 
     $('#winner').append(data.utilisateur + ' gagne la partie avec un score de ' + data.score);
   });
+
+  socket.on('nameOftheWinner',function(data){
+    $('.modal-title').html('Congratulations '+data.utilisateur+ ', you\'re a Badass');
+  })
 });
 })(window, io);

@@ -7,10 +7,8 @@ module.exports = function(io) {
 		jeu.find({}).limit(10).sort({score:-1}).toArray(function(err, data) {
 		if (err) {
 			console.log('error mongo');
-		} else {
+		} 
 
-		}
-		
 		res.render('jeu', {
 			data: data
 			// login: 
@@ -18,7 +16,7 @@ module.exports = function(io) {
 	});
 	});
 	// usernames which are currently connected to the chat
-	var usernames = {};
+	var usernames = [];
 	// rooms which are currently available in chat
 	var rooms = [{
 		name: 'room1',
@@ -67,7 +65,7 @@ module.exports = function(io) {
 						if (carres[index].score > 500) {
 							end = true;
 							io.sockets.in(socket.room.name).emit('endOfGame', endOfGame);
-
+							io.sockets.in(socket.room.name).emit('nameOftheWinner', endOfGame);
 						}
 					}
 				}
@@ -84,9 +82,7 @@ module.exports = function(io) {
 						}
 					}
 				};
-
 				checkCollision();
-
 				io.sockets.in(socket.room.name).emit('majTruck', that);
 			},
 			tabPosition: [-3, -2, -1, 0, 1],
@@ -101,7 +97,6 @@ module.exports = function(io) {
 			socket.score = 0;
 			socket.camion = Camion;
 
-			usernames[socket.username] = socket.username;
 			for (var i = 0; i < rooms.length; i++) {
 				if (rooms[i].profil.length < 2) {
 					rooms[i].profil.push(data.prompt);
@@ -112,7 +107,7 @@ module.exports = function(io) {
 			// send client to room 1
 			socket.join(socket.room.name);
 			gameData = {
-				username: socket.username,
+				username: socket.room.profil,
 				room: socket.room.name,
 				tailleX: socket.screenWidth,
 				tailleY: socket.scrennHeight,
@@ -121,7 +116,7 @@ module.exports = function(io) {
 
 			//launch the party
 			// socket.emit('majScore', socket.score)
-			socket.emit('affichage', gameData);
+			io.sockets.in(socket.room.name).emit('affichage', gameData);
 			if (socket.room.profil.length == 2) {
 				console.log(socket.room)
 				io.sockets.in(socket.room.name).emit('newTruck', socket.camion);
@@ -165,9 +160,7 @@ module.exports = function(io) {
 				position: 'absolute',
 				backgroundColor: randomColor,
 			};
-
 			carres[carre.id] = carre;
-
 			// mon carré
 			socket.emit('creerMonCarre', carre);
 			//celui de tout ceux connécté
@@ -195,11 +188,10 @@ module.exports = function(io) {
 
 		//when the user disconnects.. perform this
 		socket.on('disconnect', function() {
-
 			console.log('passé par déconnection')
 			var jeu = maDb.collection('jeu');
 
-			io.emit('deco', socket.camion)
+	
 			if (socket.room) {
 				for (var i = 0; i < 2; i++) {
 					if (socket.username == socket.room.profil[i]) {
@@ -207,10 +199,7 @@ module.exports = function(io) {
 					}
 				}
 				socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
-				// socket.leave(socket.room.name);
-				// delete usernames[socket.username];
-				// update list of users in chat, client-side
-				delete socket.username;
+
 			}
 			for (index in carres) {
 				jeu.insert({
