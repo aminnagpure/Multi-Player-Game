@@ -7,8 +7,7 @@ module.exports = function(io) {
 		jeu.find({}).limit(10).sort({score:-1}).toArray(function(err, data) {
 		if (err) {
 			console.log('error mongo');
-		} 
-
+		}
 		res.render('jeu', {
 			data: data
 			// login: 
@@ -188,7 +187,7 @@ module.exports = function(io) {
 
 		//when the user disconnects.. perform this
 		socket.on('disconnect', function() {
-			console.log('passé par déconnection')
+			console.log('passé par déconnection');
 			var jeu = maDb.collection('jeu');
 
 	
